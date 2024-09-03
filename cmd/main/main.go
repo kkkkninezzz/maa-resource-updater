@@ -37,7 +37,7 @@ func startUpdate() {
 	// 获取可执行文件所在的目录
 	execDir := filepath.Dir(execPath)
 
-	hasUpdateFlag := updater.CheckResourceVersion(config.MaaResourceVersionFileUrl, filepath.Join(execDir, "resource/version.json"))
+	hasUpdateFlag := updater.CheckResourceVersion(config.MaaResourceVersionFileUrl, filepath.Join(execDir, "resource", "version.json"))
 
 	if !hasUpdateFlag {
 		log.Println("It is currently the latest version.")

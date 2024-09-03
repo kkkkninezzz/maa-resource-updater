@@ -116,7 +116,13 @@ func generateTimestampedFilename(unzipDir string) string {
 	return filepath.Join(unzipDir, filename)
 }
 
-func UpdateResource(maaResourceFileUrl string, unzipDir string) {
+func UpdateResource(maaResourceFileUrl string, maaDir string) {
+	unzipDir := filepath.Join(maaDir, "updateTemp")
+	// Ensure the destination directory exists
+	err := os.MkdirAll(unzipDir, os.ModePerm)
+	if err != nil {
+		log.Panicf("Error create updateTemp dir: %v", err)
+	}
 
 	tempPath := generateTimestampedFilename(unzipDir)
 	downloadRemoteResource(maaResourceFileUrl, tempPath)
@@ -125,21 +131,21 @@ func UpdateResource(maaResourceFileUrl string, unzipDir string) {
 	unzipResource(tempPath, unzipDir)
 
 	log.Println("Start move resource file")
-	moveResourceFiles(unzipDir)
+	moveResourceFiles(maaDir, unzipDir)
 
 	// 删除文件
-	err := os.Remove(tempPath)
+	err = os.Remove(tempPath)
 	if err != nil {
 		log.Panicf("Error remove temp resouce file: %v", err)
 	}
 }
 
 // 需要将解压的文件移动到指定目录
-func moveResourceFiles(unzipDir string) {
+func moveResourceFiles(maaDir string, unzipDir string) {
 	unzipedMaaPath := filepath.Join(unzipDir, "MaaResource-main")
 
 	unzipedMaaResourcePath := filepath.Join(unzipedMaaPath, "resource")
-	maaResoucePath := filepath.Join(unzipDir, "resource")
+	maaResoucePath := filepath.Join(maaDir, "resource")
 	err := moveDir(unzipedMaaResourcePath, maaResoucePath)
 
 	if err != nil {
@@ -147,7 +153,7 @@ func moveResourceFiles(unzipDir string) {
 	}
 
 	unzipedMaaCachePath := filepath.Join(unzipedMaaPath, "cache")
-	maaCachePath := filepath.Join(unzipDir, "cache")
+	maaCachePath := filepath.Join(maaDir, "cache")
 	err = moveDir(unzipedMaaCachePath, maaCachePath)
 
 	if err != nil {
